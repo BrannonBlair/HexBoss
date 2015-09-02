@@ -20,7 +20,8 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 public class HexBoss extends JavaPlugin implements Listener {
-	static HashMap<UUID, String> mobChallengeList = new HashMap<UUID, String>();
+	HashMap<UUID, String> mobChallengeList = new HashMap<UUID, String>();
+	public Skeleton skeleton = null;
 	public HexBoss plugin;
 	int taskid;
 	int taskid2;
@@ -48,7 +49,7 @@ public class HexBoss extends JavaPlugin implements Listener {
 					Location location = new Location(w, -57, 67, 273);
 					spawnWitherSkeleton(location);
 					dead = false;
-					spawnPigs(location);
+					spawnPigs();
 					isDead();
 				}
 			}
@@ -88,11 +89,12 @@ public class HexBoss extends JavaPlugin implements Listener {
 		}
 	}
 
-	public Runnable spawnPigs(Location loc) {
+	public Runnable spawnPigs() {
 		this.taskid3 = getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
 			public void run() {
 				int minimum = 1;
 				int maximum = 5;
+				Location loc = skeleton.getLocation();
 				Random rn = new Random();
 				int range = maximum - minimum + 1;
 				int randomNum =  rn.nextInt(range) + minimum;
@@ -106,8 +108,8 @@ public class HexBoss extends JavaPlugin implements Listener {
 	}
 
 	@SuppressWarnings("deprecation")
-	public static void spawnWitherSkeleton(Location loc) {
-		Skeleton skeleton = (Skeleton) loc.getWorld().spawnEntity(loc, EntityType.SKELETON);
+	public void spawnWitherSkeleton(Location loc) {
+		skeleton = (Skeleton) loc.getWorld().spawnEntity(loc, EntityType.SKELETON);
 		skeleton.setSkeletonType(Skeleton.SkeletonType.WITHER);
 		skeleton.addPotionEffect(new PotionEffect(PotionEffectType.FAST_DIGGING, 99999999, 2));
 		skeleton.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 99999999, 2));
