@@ -14,7 +14,6 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.PigZombie;
 import org.bukkit.entity.Skeleton;
-import org.bukkit.entity.Zombie;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
@@ -60,7 +59,20 @@ public class HexBoss extends JavaPlugin implements Listener {
 		getServer().getPluginManager().registerEvents(this, this);
 		getConfig().options().copyDefaults(true);
 		saveConfig();
+		SkeletonDie();
+		pigsDie();
 		startMinutesCountdown();
+	}
+	
+	public void SkeletonDie() {
+		for (Entity en : getServer().getWorld("world").getEntitiesByClasses(Skeleton.class)) {
+			if (((LivingEntity) en).getCustomName() == null) {
+				continue;
+			}
+			if (((LivingEntity) en).getCustomName().equals(ChatColor.translateAlternateColorCodes('&', bossName))) {
+				en.remove();
+			}
+		}
 	}
 
 	public Runnable startMinutesCountdown() {
@@ -108,10 +120,13 @@ public class HexBoss extends JavaPlugin implements Listener {
 
 	public void pigsDie() {
 		for (Entity en : getServer().getWorld("world").getEntitiesByClasses(PigZombie.class)) {
-			if (((LivingEntity) en).getCustomName().equals(ChatColor.translateAlternateColorCodes('&', pigName)))
+			if (((LivingEntity) en).getCustomName() == null) {
+				continue;
+			}
+			if (((LivingEntity) en).getCustomName().equals(ChatColor.translateAlternateColorCodes('&', pigName))) {
 				en.remove();
+			}
 		}
-		return;
 	}
 
 	public void onCreatureSpawn(CreatureSpawnEvent event) {
