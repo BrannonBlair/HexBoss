@@ -8,6 +8,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.PigZombie;
 import org.bukkit.entity.Skeleton;
@@ -26,15 +27,36 @@ public class HexBoss extends JavaPlugin implements Listener {
 	int taskid;
 	int taskid2;
 	int taskid3;
-	int interval = 1;
-	int minutesToCountDown = interval;
 	public boolean dead = true;
-	String prefix = ChatColor.AQUA + "[" + ChatColor.GREEN + "HexBoss 1.0" + ChatColor.AQUA + "] ";
+	
+	FileConfiguration config = getConfig();
+	
+	public int bossInterval = Integer.valueOf(getConfig().getInt("boss_interval"));
+	public int minionInterval =Integer.valueOf(getConfig().getInt("minion_interval"));
+	public String bossSpawn = getConfig().getString("messages.boss_spawn");
+	public String bossDeath = getConfig().getString("messages.boss_death");
+	
+	public String bossName = getConfig().getString("boss_settings.boss_name");
+	public int haste = Integer.valueOf(getConfig().getInt("boss_settings.haste_level"));
+	public int speed = Integer.valueOf(getConfig().getInt("boss_settings.speed_level"));
+	public int strength = Integer.valueOf(getConfig().getInt("boss_settings.strength_level"));
+	public int sMaxhealth = Integer.valueOf(getConfig().getInt("boss_settings.max_health"));
+	public int sSethealth = Integer.valueOf(getConfig().getInt("boss_settings.set_health"));
+	
+	private String pigName = getConfig().getString("minion_settings.minion_name");
+	private int pigMaxhealth = Integer.valueOf(getConfig().getInt("minion_settings.minion_max_health"));
+	private int pigSethealth = Integer.valueOf(getConfig().getInt("minion_settings.minion_set_health"));
+	private int pigRange = Integer.valueOf(getConfig().getInt("minion_settings.minion_range"));
+	
+	String prefix = ChatColor.AQUA + "[" + ChatColor.GREEN + "HexBoss" + ChatColor.AQUA + "] ";
+	int interval = bossInterval;
+	int minutesToCountDown = interval;
 
 	public void onEnable() {
 		Bukkit.getConsoleSender().sendMessage(prefix + ChatColor.GREEN + "Successfully Started");
 		getServer().getPluginManager().registerEvents(this, this);
-
+        getConfig().options().copyDefaults(true);  
+        saveConfig();
 		startMinutesCountdown();
 	}
 
@@ -43,8 +65,7 @@ public class HexBoss extends JavaPlugin implements Listener {
 			public void run() {
 				HexBoss.this.minutesToCountDown -= 1;
 				if (HexBoss.this.minutesToCountDown == 0) {
-					Bukkit.broadcastMessage(prefix + "You better run!");
-					Bukkit.getConsoleSender().sendMessage(prefix + ChatColor.GREEN + "Wither Spawning");
+					Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', prefix + bossSpawn));
 					World w = getServer().getWorld("world");
 					Location location = new Location(w, -57, 67, 273);
 					spawnWitherSkeleton(location);
@@ -74,8 +95,7 @@ public class HexBoss extends JavaPlugin implements Listener {
 	public void onEntityDeathEvent(EntityDeathEvent event) {
 		UUID entityUUID = event.getEntity().getUniqueId();
 		if (mobChallengeList.containsKey(entityUUID)) {
-			Bukkit.broadcastMessage(prefix + "You killed the boss!");
-			Bukkit.getConsoleSender().sendMessage(prefix + ChatColor.GREEN + "Wither dead");
+			Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', prefix + bossDeath));
 			mobChallengeList.remove(entityUUID);
 			dead = true;
 		}
@@ -91,19 +111,27 @@ public class HexBoss extends JavaPlugin implements Listener {
 
 	public Runnable spawnPigs() {
 		this.taskid3 = getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
+			@SuppressWarnings("deprecation")
 			public void run() {
-				int minimum = 1;
-				int maximum = 5;
-				Location loc = skeleton.getLocation();
 				Random rn = new Random();
-				int range = maximum - minimum + 1;
-				int randomNum =  rn.nextInt(range) + minimum;
-				for (int z = 1; z < randomNum; z++) {
+				int range = pigRange;
+				int randomNum =  rn.nextInt(range);
+				for (int z1 = 1; z1 < randomNum; z1++) {
+					int x = skeleton.getLocation().getBlockX() + rn.nextInt(3 - (-3) + 1) + (-3);
+					int y = skeleton.getLocation().getBlockY()+1;
+					int z = skeleton.getLocation().getBlockZ() + rn.nextInt(3 - (-3) + 1) + (-3);
+					World w = getServer().getWorld("world");
+					Location loc = new Location(w, x, y, z);
 					PigZombie pig = (PigZombie) loc.getWorld().spawnEntity(loc, EntityType.PIG_ZOMBIE);
+					pig.setMaxHealth(pigMaxhealth);
+					pig.setHealth(pigSethealth);
+					pig.setCustomName(ChatColor.translateAlternateColorCodes('&', pigName));
+					pig.setCustomNameVisible(true);
 					pig.setAngry(true);
+					pig.setBaby(true);
 				}
 			}
-		}, 0L, 200L);
+		}, 0L, 40L * minionInterval);
 		return null;
 	}
 
@@ -111,12 +139,12 @@ public class HexBoss extends JavaPlugin implements Listener {
 	public void spawnWitherSkeleton(Location loc) {
 		skeleton = (Skeleton) loc.getWorld().spawnEntity(loc, EntityType.SKELETON);
 		skeleton.setSkeletonType(Skeleton.SkeletonType.WITHER);
-		skeleton.addPotionEffect(new PotionEffect(PotionEffectType.FAST_DIGGING, 99999999, 2));
-		skeleton.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 99999999, 2));
-		skeleton.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 99999999, 2));
-		skeleton.setMaxHealth(1001);
-		skeleton.setHealth(200);
-		skeleton.setCustomName("Dear god");
+		skeleton.addPotionEffect(new PotionEffect(PotionEffectType.FAST_DIGGING, 99999999, haste));
+		skeleton.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 99999999, speed));
+		skeleton.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 99999999, strength));
+		skeleton.setMaxHealth(sMaxhealth);
+		skeleton.setHealth(sSethealth);
+		skeleton.setCustomName(ChatColor.translateAlternateColorCodes('&', bossName));
 		skeleton.setCustomNameVisible(true);
 		mobChallengeList.put(skeleton.getUniqueId(), "Server");
 	}
