@@ -51,15 +51,15 @@ public class HexBoss extends JavaPlugin implements Listener {
 	public int sMaxhealth = Integer.valueOf(getConfig().getInt("boss_settings.max_health"));
 	public int sSethealth = Integer.valueOf(getConfig().getInt("boss_settings.set_health"));
 
-	private String pigName = getConfig().getString("minion_settings.minion_name");
-	private int pigMaxhealth = Integer.valueOf(getConfig().getInt("minion_settings.minion_max_health"));
-	private int pigSethealth = Integer.valueOf(getConfig().getInt("minion_settings.minion_set_health"));
-	private int pigRange = Integer.valueOf(getConfig().getInt("minion_settings.minion_range"));
+	public String pigName = getConfig().getString("minion_settings.minion_name");
+	public int pigMaxhealth = Integer.valueOf(getConfig().getInt("minion_settings.minion_max_health"));
+	public int pigSethealth = Integer.valueOf(getConfig().getInt("minion_settings.minion_set_health"));
+	public int pigRange = Integer.valueOf(getConfig().getInt("minion_settings.minion_range"));
 
-	private String worldName = getConfig().getString("world_settings.World");
-	private int spawnX = Integer.valueOf(getConfig().getInt("world_settings.X"));
-	private int spawnY = Integer.valueOf(getConfig().getInt("world_settings.Y"));
-	private int spawnZ = Integer.valueOf(getConfig().getInt("world_settings.Z"));
+	public String worldName = getConfig().getString("world_settings.World");
+	public int spawnX = Integer.valueOf(getConfig().getInt("world_settings.X"));
+	public int spawnY = Integer.valueOf(getConfig().getInt("world_settings.Y"));
+	public int spawnZ = Integer.valueOf(getConfig().getInt("world_settings.Z"));
 
 	String prefix = ChatColor.AQUA + "[" + ChatColor.GREEN + "HexBoss" + ChatColor.AQUA + "] ";
 	int interval = bossInterval;
@@ -156,15 +156,10 @@ public class HexBoss extends JavaPlugin implements Listener {
 			public void run() {
 				if (dead == true) {
 					Bukkit.getServer().getScheduler().cancelTask(taskid2);
-					Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', prefix + "task 2"));
 					Bukkit.getServer().getScheduler().cancelTask(taskid3);
-					Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', prefix + "task 3"));
 					pigsDie();
-					Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', prefix + "pigs"));
 					HexBoss.this.minutesToCountDown = interval;
-					Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', prefix + "timer"));
 				}
-				Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', prefix + "im still running"));
 			}
 		}, 0L, 20L);
 		return null;
