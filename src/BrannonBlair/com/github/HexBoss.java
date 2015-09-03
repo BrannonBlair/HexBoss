@@ -1,8 +1,6 @@
 package BrannonBlair.com.github;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
@@ -104,7 +102,6 @@ public class HexBoss extends JavaPlugin implements Listener {
 
 	@SuppressWarnings("deprecation")
 	public void barRemoval() {
-		List<String> sort = new ArrayList<String>();
 		int i = 0;
 		for (Player player : Bukkit.getOnlinePlayers()) {
 			BarAPI.removeBar(player);
@@ -127,8 +124,7 @@ public class HexBoss extends JavaPlugin implements Listener {
 		tittle = ChatColor.translateAlternateColorCodes('&', tittle);
 
 		float health = (float) ((Damageable) e).getHealth();
-		float maxHealth = (float) ((Damageable) e).getMaxHealth();
-		float setHealth = health * 100.0F / maxHealth;
+		float setHealth = health * 100.0F / (sSethealth - 20);
 		try {
 			BossBarAPI.setMessage(p, tittle, setHealth);
 		} catch (Exception localException1) {
