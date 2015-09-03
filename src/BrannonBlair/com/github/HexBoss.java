@@ -9,18 +9,23 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Damageable;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.PigZombie;
+import org.bukkit.entity.Player;
 import org.bukkit.entity.Skeleton;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.inventivetalent.bossbar.BossBarAPI;
 
 public class HexBoss extends JavaPlugin implements Listener {
 	HashMap<UUID, String> mobChallengeList = new HashMap<UUID, String>();
@@ -29,10 +34,11 @@ public class HexBoss extends JavaPlugin implements Listener {
 	int taskid;
 	int taskid2;
 	int taskid3;
+	int taskid4;
 	public boolean dead = true;
 
 	FileConfiguration config = getConfig();
-
+	public String bossTitleName = getConfig().getString("bossBarsName");
 	public int bossInterval = Integer.valueOf(getConfig().getInt("boss_interval"));
 	public int minionInterval = Integer.valueOf(getConfig().getInt("minion_interval"));
 	public String bossSpawn = getConfig().getString("messages.boss_spawn");
@@ -50,6 +56,11 @@ public class HexBoss extends JavaPlugin implements Listener {
 	private int pigSethealth = Integer.valueOf(getConfig().getInt("minion_settings.minion_set_health"));
 	private int pigRange = Integer.valueOf(getConfig().getInt("minion_settings.minion_range"));
 
+	private String worldName = getConfig().getString("world_settings.World");
+	private int spawnX = Integer.valueOf(getConfig().getInt("world_settings.X"));
+	private int spawnY = Integer.valueOf(getConfig().getInt("world_settings.Y"));
+	private int spawnZ = Integer.valueOf(getConfig().getInt("world_settings.Z"));
+
 	String prefix = ChatColor.AQUA + "[" + ChatColor.GREEN + "HexBoss" + ChatColor.AQUA + "] ";
 	int interval = bossInterval;
 	int minutesToCountDown = interval;
@@ -63,9 +74,9 @@ public class HexBoss extends JavaPlugin implements Listener {
 		pigsDie();
 		startMinutesCountdown();
 	}
-	
+
 	public void SkeletonDie() {
-		for (Entity en : getServer().getWorld("world").getEntitiesByClasses(Skeleton.class)) {
+		for (Entity en : getServer().getWorld(worldName).getEntitiesByClasses(Skeleton.class)) {
 			if (((LivingEntity) en).getCustomName() == null) {
 				continue;
 			}
@@ -75,14 +86,61 @@ public class HexBoss extends JavaPlugin implements Listener {
 		}
 	}
 
+	public void fixBar(Player p) {
+		double dis = 26.0D;
+		Entity b = skeleton;
+		if (p.getLocation().distance(skeleton.getLocation()) < dis) {
+			dis = p.getLocation().distance(skeleton.getLocation());
+			b = skeleton;
+		}
+		if (b != null) {
+			showBossBar(p, b);
+		}
+	}
+
+	public void clearInfo(Player player) {
+			BossBarAPI.removeBar(player);
+			Bukkit.getConsoleSender().sendMessage(prefix + ChatColor.GREEN + "Removed");
+	}
+
+	public void showBossBar(Player p, Entity e) {
+		String tittle = null;
+		if (bossTitleName != null)
+			tittle = bossTitleName;
+		int count = 4;
+		try {
+			do {
+				count--;
+				if (count <= 0) {
+					break;
+				}
+			} while (
+
+			tittle.length() > 64);
+		} catch (Exception x) {
+			System.out.println("showBossBar error: ");
+			x.printStackTrace();
+		}
+		tittle = ChatColor.translateAlternateColorCodes('&', tittle);
+
+		float health = (float) ((Damageable) e).getHealth();
+		float maxHealth = (float) ((Damageable) e).getMaxHealth();
+		float setHealth = health * 100.0F / maxHealth;
+		try {
+			BossBarAPI.setMessage(p, tittle, setHealth);
+			removeBar(p);
+		} catch (Exception localException1) {
+		}
+	}
+
 	public Runnable startMinutesCountdown() {
 		this.taskid = getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
 			public void run() {
 				HexBoss.this.minutesToCountDown -= 1;
 				if (HexBoss.this.minutesToCountDown == 0) {
 					Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', prefix + bossSpawn));
-					World w = getServer().getWorld("world");
-					Location location = new Location(w, -57, 67, 273);
+					World w = getServer().getWorld(worldName);
+					Location location = new Location(w, spawnX, spawnY, spawnZ);
 					spawnWitherSkeleton(location);
 					dead = false;
 					spawnPigs();
@@ -97,16 +155,36 @@ public class HexBoss extends JavaPlugin implements Listener {
 		this.taskid2 = getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
 			public void run() {
 				if (dead == true) {
-					HexBoss.this.minutesToCountDown = interval;
 					Bukkit.getServer().getScheduler().cancelTask(taskid2);
+					Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', prefix + "task 2"));
 					Bukkit.getServer().getScheduler().cancelTask(taskid3);
+					Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', prefix + "task 3"));
 					pigsDie();
+					Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', prefix + "pigs"));
+					HexBoss.this.minutesToCountDown = interval;
+					Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', prefix + "timer"));
 				}
+				Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', prefix + "im still running"));
 			}
 		}, 0L, 20L);
 		return null;
 	}
 
+	public Runnable removeBar(Player p) {
+		this.taskid4 = getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
+			public void run() {
+				if (dead == true) {
+					clearInfo(p);
+					Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', prefix + "This event is canceled"));
+					Bukkit.getServer().getScheduler().cancelTask(taskid4);
+					Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', prefix + "task 4"));
+				}
+			}
+		}, 0L, 20L);
+		return null;
+	}
+	
+	
 	@EventHandler
 	public void onEntityDeathEvent(EntityDeathEvent event) {
 		UUID entityUUID = event.getEntity().getUniqueId();
@@ -114,12 +192,12 @@ public class HexBoss extends JavaPlugin implements Listener {
 			Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', prefix + bossDeath));
 			mobChallengeList.remove(entityUUID);
 			dead = true;
+			
 		}
-		return;
 	}
 
 	public void pigsDie() {
-		for (Entity en : getServer().getWorld("world").getEntitiesByClasses(PigZombie.class)) {
+		for (Entity en : getServer().getWorld(worldName).getEntitiesByClasses(PigZombie.class)) {
 			if (((LivingEntity) en).getCustomName() == null) {
 				continue;
 			}
@@ -160,6 +238,19 @@ public class HexBoss extends JavaPlugin implements Listener {
 			}
 		}, 0L, 40L * minionInterval);
 		return null;
+	}
+
+	@EventHandler(priority = EventPriority.HIGH)
+	public void onEnitityDamaged(EntityDamageEvent e) {
+		Entity mob = e.getEntity();
+		UUID entityUUID = e.getEntity().getUniqueId();
+		if (mobChallengeList.containsKey(entityUUID)) {
+			for (Entity entity : mob.getNearbyEntities(64.0D, 64.0D, 64.0D)) {
+				if ((entity instanceof Player)) {
+					fixBar((Player) entity);
+				}
+			}
+		}
 	}
 
 	@SuppressWarnings("deprecation")
