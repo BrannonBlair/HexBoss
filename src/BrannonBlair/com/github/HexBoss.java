@@ -8,6 +8,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Damageable;
 import org.bukkit.entity.Entity;
@@ -77,6 +79,49 @@ public class HexBoss extends JavaPlugin implements Listener {
 		startMinutesCountdown();
 	}
 
+    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+        if (cmd.getName().equalsIgnoreCase("hexboss")) {
+            if (sender instanceof Player) {
+                Player player = (Player) sender;
+                if (player.hasPermission("hexboss.time")) {
+                    if (args[0].equalsIgnoreCase("time")) {
+                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', prefix + "&cThe boss will spawn in about &b" + (minutesToCountDown + 1) + " &cminutes!"));
+                    } else if (args.length > 1) {
+                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cToo many arguments. &a/hexboss time"));
+                    }
+                } else {
+                    sender.sendMessage(ChatColor.RED + "You don't have access to this command.");
+                }
+                return true;
+            } else {
+                sender.sendMessage(ChatColor.RED + "Only players can use this command!");
+                return true;
+            }
+        } else if (cmd.getName().equalsIgnoreCase("hexadmin")) {
+            if (sender instanceof Player) {
+                Player player = (Player) sender;
+                if (player.hasPermission("hexboss.admin")) {
+                	if (args.length == 1) {
+                        String test = args[0].replaceAll("[^0-9]+", "");
+                        int minuteNumber = Integer.parseInt(test);
+                        minutesToCountDown = minuteNumber + 1;
+                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', prefix + "&cThe boss will now spawn in about &b" + minutesToCountDown + " &cminutes!"));
+                	} else if (args.length > 1) {
+                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cToo many arguments. &a/hexadmin [number] to set the time."));
+                    }
+                } else {
+                    sender.sendMessage(ChatColor.RED + "You don't have access to this command.");
+                }
+                return true;
+            } else {
+                sender.sendMessage(ChatColor.RED + "Only players can use this command!");
+                return true;
+            }
+        }
+		return true;
+    }
+	
+	
 	public void SkeletonDie() {
 		for (Entity en : getServer().getWorld(worldName).getEntitiesByClasses(Skeleton.class)) {
 			if (((LivingEntity) en).getCustomName() == null) {
@@ -106,7 +151,6 @@ public class HexBoss extends JavaPlugin implements Listener {
 		for (Player player : Bukkit.getOnlinePlayers()) {
 			BarAPI.removeBar(player);
 			i++;
-			Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', prefix + "I have been called" + i + player));
 		}
 	}
 
@@ -124,7 +168,7 @@ public class HexBoss extends JavaPlugin implements Listener {
 		tittle = ChatColor.translateAlternateColorCodes('&', tittle);
 
 		float health = (float) ((Damageable) e).getHealth();
-		float setHealth = health * 100.0F / (sSethealth - 20);
+		float setHealth = health * 100.0F / (sSethealth - (sSethealth/10));
 		try {
 			BossBarAPI.setMessage(p, tittle, setHealth);
 		} catch (Exception localException1) {
