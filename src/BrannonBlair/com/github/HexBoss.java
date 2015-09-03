@@ -100,10 +100,8 @@ public class HexBoss extends JavaPlugin implements Listener {
 	}
 	public void barRemoval(Player p) {
 		double dis = 26.0D;
-		Location b = SkeleDead;
 		if (p.getLocation().distance(((Entity) SkeleDead).getLocation()) < dis) {
 			dis = p.getLocation().distance(((Entity) SkeleDead).getLocation());
-			b = SkeleDead;
 		}
 		removeBar(p);
 	}
