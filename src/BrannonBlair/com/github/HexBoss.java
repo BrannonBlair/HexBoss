@@ -64,6 +64,7 @@ public class HexBoss extends JavaPlugin implements Listener {
 	String prefix = ChatColor.AQUA + "[" + ChatColor.GREEN + "HexBoss" + ChatColor.AQUA + "] ";
 	int interval = bossInterval;
 	int minutesToCountDown = interval;
+	Location SkeleDead;
 
 	public void onEnable() {
 		Bukkit.getConsoleSender().sendMessage(prefix + ChatColor.GREEN + "Successfully Started");
@@ -97,7 +98,15 @@ public class HexBoss extends JavaPlugin implements Listener {
 			showBossBar(p, b);
 		}
 	}
-
+	public void barRemoval(Player p) {
+		double dis = 26.0D;
+		Location b = SkeleDead;
+		if (p.getLocation().distance(((Entity) SkeleDead).getLocation()) < dis) {
+			dis = p.getLocation().distance(((Entity) SkeleDead).getLocation());
+			b = SkeleDead;
+		}
+		removeBar(p);
+	}
 	public void clearInfo(Player player) {
 			BossBarAPI.removeBar(player);
 			Bukkit.getConsoleSender().sendMessage(prefix + ChatColor.GREEN + "Removed");
@@ -128,7 +137,6 @@ public class HexBoss extends JavaPlugin implements Listener {
 		float setHealth = health * 100.0F / maxHealth;
 		try {
 			BossBarAPI.setMessage(p, tittle, setHealth);
-			removeBar(p);
 		} catch (Exception localException1) {
 		}
 	}
@@ -184,10 +192,10 @@ public class HexBoss extends JavaPlugin implements Listener {
 	public void onEntityDeathEvent(EntityDeathEvent event) {
 		UUID entityUUID = event.getEntity().getUniqueId();
 		if (mobChallengeList.containsKey(entityUUID)) {
+			SkeleDead = skeleton.getLocation();
 			Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', prefix + bossDeath));
 			mobChallengeList.remove(entityUUID);
 			dead = true;
-			
 		}
 	}
 
