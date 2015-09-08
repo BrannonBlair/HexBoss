@@ -1,0 +1,32 @@
+# Version 1.0 of HexBoss
+# Author Brannon Blair.
+# Skype: yodamonkey5
+# Use &[color code] for colors.
+# Boss Interval in Minutes
+# Minion Interval in Seconds
+# Minion Range of how many you want to spawn at a time. 5 = Random number 0-5.
+
+bossBarsName: '&C I WILL WRECK YOU'
+boss_interval: 2
+minion_interval: 10
+messages:
+ boss_spawn: '&cBoss has spawned'
+ boss_death: '&cBoss has died'
+boss_settings:
+ boss_name: '&bHex&aBoss'
+ max_health: 201
+ set_health: 200
+ haste_level: 2
+ strength_level: 2
+ speed_level: 2
+minion_settings:
+ minion_name: '&dMinions'
+ minion_max_health: 31
+ minion_set_health: 30
+ minion_range: 5
+ minion_max: 25
+world_settings:
+ World: 'world'
+ X: -57.0
+ Y: 67.0
+ Z: 273.0

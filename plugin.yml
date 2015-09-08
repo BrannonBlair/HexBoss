@@ -1,0 +1,12 @@
+main: BrannonBlair.com.github.HexBoss
+version: 1.0
+name: HexBoss
+
+commands: 
+    hexboss:
+    hexadmin:
+permissions:
+    hexboss.time:
+        default: op
+    hexboss.admin:
+        default: op
