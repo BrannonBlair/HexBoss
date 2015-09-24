@@ -51,6 +51,11 @@ public class HexBoss extends JavaPlugin implements Listener {
     public int minionInterval = Integer.valueOf(getConfig().getInt("minion_interval"));
     public String bossSpawn = getConfig().getString("messages.boss_spawn");
     public String bossDeath = getConfig().getString("messages.boss_death");
+    
+    public String rewardName = getConfig().getString("reward.item_name");
+    public String itemName = getConfig().getString("reward.name");
+    public String rLore0 = getConfig().getString("reward.lore");
+    public String rLore1 = getConfig().getString("reward.lore1");
 
     public String bossName = getConfig().getString("boss_settings.boss_name");
     public int haste = Integer.valueOf(getConfig().getInt("boss_settings.haste_level"));
@@ -202,12 +207,12 @@ public class HexBoss extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onEntityDeathEvent (EntityDeathEvent event) {
-        ItemStack perms = new ItemStack(Material.NETHER_STAR);
+        ItemStack perms = new ItemStack(Material.getMaterial(RewardName));
         ItemMeta permsmeta = perms.getItemMeta();
-        permsmeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&6&lHexToken"));
+        permsmeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', itemName));
         ArrayList<String> Lore11 = new ArrayList<String>();
-        Lore11.add(ChatColor.translateAlternateColorCodes('&', "&7Trade these mysterious tokens"));
-        Lore11.add(ChatColor.translateAlternateColorCodes('&', "&7for treasure at /spawn"));
+        Lore11.add(ChatColor.translateAlternateColorCodes('&', rLore0));
+        Lore11.add(ChatColor.translateAlternateColorCodes('&', rLore1));
         permsmeta.setLore(Lore11);
         perms.setItemMeta(permsmeta);
         UUID entityUUID = event.getEntity().getUniqueId();

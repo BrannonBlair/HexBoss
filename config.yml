@@ -1,10 +1,13 @@
-# Version 1.0 of HexBoss
+# Version 1.1 of HexBoss
 # Author Brannon Blair.
 # Skype: yodamonkey5
 # Use &[color code] for colors.
 # Boss Interval in Minutes
 # Minion Interval in Seconds
 # Minion Range of how many you want to spawn at a time. 5 = Random number 0-5.
+# item_name is the name of the item in all caps. (supports color codes)
+# name: is the name of the item when you hover over it(supports color codes)
+# lore is the lore of the item.(supports color codes)
 
 bossBarsName: '&C I WILL WRECK YOU'
 boss_interval: 2
@@ -30,3 +33,8 @@ world_settings:
  X: -57.0
  Y: 67.0
  Z: 273.0
+reward:
+ item_name: 'NETHER_STAR'
+ name: '&6&lHextoken'
+ lore: '&7Trade these for rare items'
+ lore1: '&7at &c/spawn!'
