@@ -207,7 +207,7 @@ public class HexBoss extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onEntityDeathEvent (EntityDeathEvent event) {
-        ItemStack perms = new ItemStack(Material.getMaterial(RewardName));
+        ItemStack perms = new ItemStack(Material.getMaterial(rewardName));
         ItemMeta permsmeta = perms.getItemMeta();
         permsmeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', itemName));
         ArrayList<String> Lore11 = new ArrayList<String>();
